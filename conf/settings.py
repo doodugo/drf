@@ -42,6 +42,7 @@ INSTALLED_APPS = [
 SECOND_APPS = [
     'accounts',
     'transactions',
+    'inventory',
 ]
 
 
