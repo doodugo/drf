@@ -16,3 +16,11 @@ class User(AbstractUser):
 
     def __str__(self):
         return f'{self.username} ({self.user_type})'
+
+    @property
+    def is_seller(self):
+        return self.user_type == 'seller'
+
+    @property
+    def is_buyer(self):
+        return self.user_type == 'buyer'
