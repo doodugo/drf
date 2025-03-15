@@ -23,6 +23,14 @@ class CashLog(TimeStampedModel):
     def __str__(self):
         return f"User {self.user_id.username}: {self.cash}원 ({self.created_date})"
 
+    WELCOME_CASH = 30000
+    @classmethod
+    def create_welcome_cash(cls, user_id):
+        cls.objects.create(
+            user_id=user_id,
+            cash=cls.WELCOME_CASH,
+        )
+
 
 class Sale(TimeStampedModel):
     user_id = models.ForeignKey(

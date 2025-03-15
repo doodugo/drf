@@ -1,4 +1,4 @@
-from datetime import timezone
+from django.db import transaction
 from rest_framework import serializers
 
 from transactions.models import CashLog
@@ -14,6 +14,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = ['username', 'email', 'password', 'user_type']
 
+    @transaction.atomic
     def create(self, validated_data):
         # 사용자 생성 시 중복된 사용자 체크
         if User.objects.filter(email=validated_data['email']).exists():
@@ -27,6 +28,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         if created:
             user.set_password(validated_data['password'])
             user.save()
+            CashLog.create_welcome_cash(user)
         else:
             raise serializers.ValidationError({
                 'error': '이미 존재하는 사용자입니다.'
