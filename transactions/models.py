@@ -31,6 +31,12 @@ class CashLog(TimeStampedModel):
             cash=cls.WELCOME_CASH,
         )
 
+    @classmethod
+    def total_cash(cls, user_id):
+        total_cash = cls.objects.filter(user_id=user_id).aggregate(
+            total_cash=models.Sum('cash'))['total_cash'] or 0
+        return total_cash
+
 
 class Sale(TimeStampedModel):
     user_id = models.ForeignKey(
