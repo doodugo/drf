@@ -10,6 +10,8 @@ class User(AbstractUser):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True, blank=False)
+    user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES, blank=False)
+    username = models.CharField(max_length=20, blank=False, help_text='이름')
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'user_type', 'password']
