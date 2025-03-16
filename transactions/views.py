@@ -8,11 +8,11 @@ from .serializers import BuySerializer, SaleSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from .models import Buy, Sale
+from .models import Buy, CashLog, Sale
 from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
 from django.db import transaction
-
+from django.db.models import F
 
 class SalePagination(PageNumberPagination):
     page_size = 10
@@ -100,9 +100,16 @@ class BuyView(viewsets.ModelViewSet):
     serializer_class = BuySerializer
     permission_classes = [IsAuthenticated]
 
+    @transaction.atomic
     def perform_create(self, serializer):
         try: 
             serializer.save(user_id=self.request.user)
+            CashLog.objects.create(
+                user_id=self.request.user,
+                cash = -(serializer.validated_data['amount'] * serializer.validated_data['sale_id'].price)
+            )
+            serializer.validated_data['sale_id'].amount = F('amount') - serializer.validated_data['amount']
+            serializer.validated_data['sale_id'].save(update_fields=['amount'])
         except ValidationError as e:
             return Response(
                 {"detail": str(e)},
