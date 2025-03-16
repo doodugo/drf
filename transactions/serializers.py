@@ -38,10 +38,10 @@ class BuySerializer(serializers.ModelSerializer):
         fields = ['sale_id', 'amount']
 
     def validate(self, data):
-        request_id = self.context['request'].data.get("request_id")
-        if cache.get(request_id):
+        sale = data['sale_id']
+        if cache.get(f'sale_transaction_lock_{sale.id}'):
             raise serializers.ValidationError({"detail": "중복 요청입니다."})
-        cache.set(request_id, True, timeout=10)
+        cache.set(f'sale_transaction_lock_{sale.id}', True, timeout=1)
 
         user = self.context['request'].user
         if not user.is_buyer:
@@ -50,7 +50,6 @@ class BuySerializer(serializers.ModelSerializer):
         if data['amount'] <= 0:
             raise serializers.ValidationError("수량은 0보다 커야합니다")
 
-        sale = data['sale_id']
         if sale.amount < data['amount']:
             raise serializers.ValidationError("판매 수량이 부족합니다")
         if not sale:
