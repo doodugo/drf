@@ -3,18 +3,20 @@ from rest_framework.test import APIClient
 
 from accounts.models import User
 from inventory.models import PhotoCard
-from transactions.models import Sale
 class BuyTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
 
-        self.user = User.objects.create_user(
-            email='test_buyer@test.com',
-            username='testuser',
-            password='testpassword',
-            user_type='buyer',
-        )
-
+        signup_url = reverse('signup')
+        self.user_data = {
+            'email': 'test_buyer@test.com',
+            'username': 'testuser',
+            'password': 'testpassword',
+            'user_type': 'buyer',
+        }
+        self.client.post(signup_url, self.user_data, format='json')
+        self.user = User.objects.get(email=self.user_data['email'])
+        self.client.force_authenticate(user=self.user)
 
         seller = User.objects.create_user(
             email='test_seller@test.com',
