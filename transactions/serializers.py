@@ -24,3 +24,9 @@ class SaleSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("이미 판매 중인 포토카드입니다")
 
         return data
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['price'] = instance.buy_price
+        return data
+

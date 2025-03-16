@@ -10,10 +10,43 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Sale
 from rest_framework import viewsets
 
+
 class SaleView(viewsets.ModelViewSet):
     queryset = Sale.objects.filter()
     serializer_class = SaleSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        '''
+            판매 쿼리셋 정렬
+            order 파라미터에 따라 정렬
+            default: 최신순
+            order 파라미터 예시: ?order=photocard_name,created_date
+            photocard_name: 포토카드 이름
+            created_date: 판매 일자
+        '''
+
+        queryset = super().get_queryset()
+        queryset = queryset.order_by('-created_date')
+        ordering_param = self.request.query_params.get('order')
+
+        if ordering_param:
+            ordering_fields = []
+            ordering_list = ordering_param.split(",")
+
+            if "photocard_name" in ordering_list:
+                ordering_fields.append("photo_card_id__name")
+            elif "-photocard_name" in ordering_list:
+                ordering_fields.append("-photo_card_id__name")
+
+            if "created_date" in ordering_list:
+                ordering_fields.append("created_date")
+            elif "-created_date" in ordering_list:
+                ordering_fields.append("-created_date")
+
+            queryset = queryset.order_by(*ordering_fields)
+
+        return queryset
 
     def perform_create(self, serializer):
         serializer.save(user_id=self.request.user)
@@ -52,3 +85,8 @@ class SaleView(viewsets.ModelViewSet):
             )
 
         return Response(status=204)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
