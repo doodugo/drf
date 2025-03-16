@@ -88,3 +88,25 @@ class Sale(TimeStampedModel):
         if not self.user_id.is_seller:
             raise ValueError("판매자만 판매 가능합니다.")
         super().save(*args, **kwargs)
+
+
+class Buy(TimeStampedModel):
+    user_id = models.ForeignKey(
+        to='accounts.User',
+        on_delete=models.DO_NOTHING,
+        related_name='buys',
+        help_text = '사용자 ID',
+    )
+
+    sale_id = models.ForeignKey(
+        to='transactions.Sale',
+        on_delete=models.DO_NOTHING,
+        related_name='buys',
+        help_text = '판매 ID',
+    )
+
+    amount = models.IntegerField(
+        help_text = '구매 수량',
+        null=False,
+        blank=False,
+    )    
