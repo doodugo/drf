@@ -44,11 +44,14 @@ class BuySerializer(serializers.ModelSerializer):
         if data['amount'] <= 0:
             raise serializers.ValidationError("수량은 0보다 커야합니다")
 
-        sale = Sale.objects.get(id=data['sale_id']).filter(deleted_date__isnull=True)
+
+        sale = data['sale_id']
         if sale.amount < data['amount']:
             raise serializers.ValidationError("판매 수량이 부족합니다")
         if not sale:
             raise serializers.ValidationError("판매 상품이 존재하지 않습니다")
+        if sale.deleted_date:
+            raise serializers.ValidationError("판매 상품이 삭제되었습니다")
 
         total_cash = CashLog.total_cash(user)
         if total_cash < sale.price * data['amount']:
