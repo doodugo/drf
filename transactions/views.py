@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from datetime import datetime
 from django.shortcuts import render
 from rest_framework import generics
@@ -10,6 +11,8 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Buy, Sale
 from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
+from django.db import transaction
+
 
 class SalePagination(PageNumberPagination):
     page_size = 10
@@ -98,4 +101,10 @@ class BuyView(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        serializer.save(user_id=self.request.user)
+        try: 
+            serializer.save(user_id=self.request.user)
+        except ValidationError as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )

@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Buy, Sale, CashLog
+from django.core.cache import cache
 
 class SaleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -37,13 +38,17 @@ class BuySerializer(serializers.ModelSerializer):
         fields = ['sale_id', 'amount']
 
     def validate(self, data):
+        request_id = self.context['request'].data.get("request_id")
+        if cache.get(request_id):
+            raise serializers.ValidationError({"detail": "중복 요청입니다."})
+        cache.set(request_id, True, timeout=10)
+
         user = self.context['request'].user
         if not user.is_buyer:
             raise serializers.ValidationError("구매자만 구매 가능합니다")
 
         if data['amount'] <= 0:
             raise serializers.ValidationError("수량은 0보다 커야합니다")
-
 
         sale = data['sale_id']
         if sale.amount < data['amount']:
