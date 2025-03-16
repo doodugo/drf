@@ -9,12 +9,17 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from .models import Sale
 from rest_framework import viewsets
+from rest_framework.pagination import PageNumberPagination
+
+class SalePagination(PageNumberPagination):
+    page_size = 10
 
 
 class SaleView(viewsets.ModelViewSet):
     queryset = Sale.objects.filter()
     serializer_class = SaleSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = SalePagination
 
     def get_queryset(self):
         '''
@@ -85,8 +90,3 @@ class SaleView(viewsets.ModelViewSet):
             )
 
         return Response(status=204)
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
