@@ -106,7 +106,7 @@ class BuyView(viewsets.ModelViewSet):
             serializer.save(user_id=self.request.user)
             CashLog.objects.create(
                 user_id=self.request.user,
-                cash = -(serializer.validated_data['amount'] * serializer.validated_data['sale_id'].price)
+                cash = -(serializer.validated_data['amount'] * serializer.validated_data['sale_id'].buy_price)
             )
             serializer.validated_data['sale_id'].amount = F('amount') - serializer.validated_data['amount']
             serializer.validated_data['sale_id'].save(update_fields=['amount'])
