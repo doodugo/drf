@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Sale
+from .models import Buy, Sale, CashLog
 
 class SaleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -30,3 +30,28 @@ class SaleSerializer(serializers.ModelSerializer):
         data['price'] = instance.buy_price
         return data
 
+
+class BuySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Buy
+        fields = ['sale_id', 'amount']
+
+    def validate(self, data):
+        user = self.context['request'].user
+        if not user.is_buyer:
+            raise serializers.ValidationError("구매자만 구매 가능합니다")
+
+        if data['amount'] <= 0:
+            raise serializers.ValidationError("수량은 0보다 커야합니다")
+
+        sale = Sale.objects.get(id=data['sale_id']).filter(deleted_date__isnull=True)
+        if sale.amount < data['amount']:
+            raise serializers.ValidationError("판매 수량이 부족합니다")
+        if not sale:
+            raise serializers.ValidationError("판매 상품이 존재하지 않습니다")
+
+        total_cash = CashLog.total_cash(user)
+        if total_cash < sale.price * data['amount']:
+            raise serializers.ValidationError("캐시가 부족합니다")
+
+        return data
