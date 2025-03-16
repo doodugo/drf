@@ -3,11 +3,11 @@ from django.shortcuts import render
 from rest_framework import generics
 
 from rest_framework.exceptions import PermissionDenied, ValidationError
-from .serializers import SaleSerializer
+from .serializers import BuySerializer, SaleSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from .models import Sale
+from .models import Buy, Sale
 from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
 
@@ -90,3 +90,12 @@ class SaleView(viewsets.ModelViewSet):
             )
 
         return Response(status=204)
+
+
+class BuyView(viewsets.ModelViewSet):
+    queryset = Buy.objects.filter()
+    serializer_class = BuySerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(user_id=self.request.user)
