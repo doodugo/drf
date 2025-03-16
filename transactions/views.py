@@ -1,4 +1,4 @@
-from datetime import timezone
+from datetime import datetime
 from django.shortcuts import render
 from rest_framework import generics
 
@@ -69,7 +69,7 @@ class SaleView(viewsets.ModelViewSet):
         if instance.amount == 0:
             raise ValidationError("수량이 0인 판매건은 삭제할 수 없습니다.")
 
-        instance.deleted_date = timezone.now()
+        instance.deleted_date = datetime.now()
         instance.save()
 
 
