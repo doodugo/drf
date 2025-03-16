@@ -31,7 +31,7 @@ class SaleView(viewsets.ModelViewSet):
             created_date: 판매 일자
         '''
 
-        queryset = super().get_queryset()
+        queryset = super().get_queryset().filter(deleted_date__isnull=True)
         queryset = queryset.order_by('-created_date')
         ordering_param = self.request.query_params.get('order')
 
