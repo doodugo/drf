@@ -3,6 +3,11 @@ from rest_framework.test import APIClient
 
 from accounts.models import User
 from inventory.models import PhotoCard
+from transactions.models import Buy, CashLog, Sale
+from django.urls import reverse
+from rest_framework import status
+
+
 class BuyTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
@@ -36,6 +41,22 @@ class BuyTestCase(TestCase):
             amount=10,
             price=20000,
         )
+        self.data = {
+            'sale_id': self.sale.id,
+            'amount': 1,
+        }
 
+    def test_buy_successful(self):
+        url = reverse('buys-list')
+        response = self.client.post(url, self.data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Buy.objects.filter(user_id=self.user).count(), 1)
 
+        self.sale.refresh_from_db()
+        self.assertEqual(self.sale.amount, 9)
+
+        total_reduce_cash = self.sale.buy_price * self.data['amount']
+        self.assertEqual(CashLog.total_cash(self.user), CashLog.WELCOME_CASH - total_reduce_cash)
+        self.assertEqual(CashLog.objects.filter(user_id=self.user).count(), 2)
+        self.assertEqual(CashLog.objects.last().cash, -total_reduce_cash)
 
