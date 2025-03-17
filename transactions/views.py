@@ -118,6 +118,7 @@ class BuyView(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
+        queryset = queryset.select_related("sale_id__photo_card_id")
         photo_card_name_param = self.request.query_params.get('photocard_name')
         if photo_card_name_param:
             queryset = queryset.filter(sale_id__photo_card_id__name__icontains=photo_card_name_param)
