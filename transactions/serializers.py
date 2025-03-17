@@ -1,11 +1,13 @@
 from rest_framework import serializers
 from .models import Buy, Sale, CashLog
 from django.core.cache import cache
+from inventory.serializers import PhotoCardSerializer
 
 class SaleSerializer(serializers.ModelSerializer):
+    photo_card_id = PhotoCardSerializer()
     class Meta:
         model = Sale
-        fields = ['photo_card_id','amount', 'price']
+        fields = ['photo_card_id', 'amount', 'price']
 
     def validate(self, data):
         if not self.context['request'].user.is_seller:

@@ -35,8 +35,7 @@ class SaleView(viewsets.ModelViewSet):
         '''
 
         queryset = super().get_queryset().filter(deleted_date__isnull=True)
-        queryset = queryset.order_by('-created_date')
-        ordering_param = self.request.query_params.get('order')
+        queryset = queryset.select_related('photo_card_id').order_by('-created_date')
 
         photo_card_name_param = self.request.query_params.get('photocard_name')
         if photo_card_name_param:
@@ -50,6 +49,7 @@ class SaleView(viewsets.ModelViewSet):
         if group_name_param:
             queryset = queryset.filter(photo_card_id__group_name__icontains=group_name_param)
 
+        ordering_param = self.request.query_params.get('order')
         if ordering_param:
             ordering_fields = []
             ordering_list = ordering_param.split(",")
