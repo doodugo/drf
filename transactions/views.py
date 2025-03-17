@@ -95,10 +95,14 @@ class SaleView(viewsets.ModelViewSet):
         return Response(status=204)
 
 
+class BuyPagination(PageNumberPagination):
+    page_size = 10
+
 class BuyView(viewsets.ModelViewSet):
     queryset = Buy.objects.filter()
     serializer_class = BuySerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = BuyPagination
 
     @transaction.atomic
     def perform_create(self, serializer):
@@ -115,3 +119,9 @@ class BuyView(viewsets.ModelViewSet):
                 {"detail": str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset().filter(user_id=request.user)
+        queryset = self.paginate_queryset(queryset)
+        serializer = self.get_serializer(queryset, many=True)
+        return self.get_paginated_response(serializer.data)
