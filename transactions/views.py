@@ -116,6 +116,22 @@ class BuyView(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     pagination_class = BuyPagination
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        photo_card_name_param = self.request.query_params.get('photocard_name')
+        if photo_card_name_param:
+            queryset = queryset.filter(sale_id__photo_card_id__name__icontains=photo_card_name_param)
+
+        artist_name_param = self.request.query_params.get('artist_name')
+        if artist_name_param:
+            queryset = queryset.filter(sale_id__photo_card_id__artist_name__icontains=artist_name_param)
+
+        group_name_param = self.request.query_params.get('group_name')
+        if group_name_param:
+            queryset = queryset.filter(sale_id__photo_card_id__group_name__icontains=group_name_param)
+
+        return queryset
+
     @transaction.atomic
     def perform_create(self, serializer):
         try: 
