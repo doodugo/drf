@@ -58,7 +58,7 @@ class BuyTestCase(TestCase):
         self.assertEqual(self.sale.amount, 9)
 
         total_reduce_cash = self.sale.buy_price * self.data['amount']
-        self.assertEqual(CashLog.total_cash(self.user), CashLog.WELCOME_CASH - total_reduce_cash)
+        self.assertEqual(self.user.total_cash, CashLog.WELCOME_CASH - total_reduce_cash)
         self.assertEqual(CashLog.objects.filter(user_id=self.user).count(), 2)
         self.assertEqual(CashLog.objects.last().cash, -total_reduce_cash)
 

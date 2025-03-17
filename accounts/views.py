@@ -13,5 +13,5 @@ class TotalCashView(views.APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        total_cash = CashLog.total_cash(request.user.id)
+        total_cash = request.user.total_cash
         return Response({'total_cash': total_cash})

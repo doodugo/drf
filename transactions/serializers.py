@@ -61,7 +61,7 @@ class BuySerializer(serializers.ModelSerializer):
         if sale.deleted_date:
             raise serializers.ValidationError("판매 상품이 삭제되었습니다")
 
-        total_cash = CashLog.total_cash(user)
+        total_cash = user.total_cash
         if total_cash < sale.buy_price * data['amount']:
             raise serializers.ValidationError("캐시가 부족합니다")
 

@@ -31,6 +31,7 @@ class CashLog(TimeStampedModel):
             cash=cls.WELCOME_CASH,
         )
 
+    #DEPRECATED
     @classmethod
     def total_cash(cls, user_id):
         total_cash = cls.objects.filter(user_id=user_id).aggregate(
