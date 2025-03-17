@@ -1,6 +1,6 @@
 from django.db import models
 from conf.models import TimeStampedModel
-
+from django.db import transaction
 
 class CashLog(TimeStampedModel):
     user_id = models.ForeignKey(
@@ -36,6 +36,13 @@ class CashLog(TimeStampedModel):
         total_cash = cls.objects.filter(user_id=user_id).aggregate(
             total_cash=models.Sum('cash'))['total_cash'] or 0
         return total_cash
+
+    @transaction.atomic
+    def save(self, *args, **kwargs):
+        user = self.user_id
+        user.total_cash += self.cash
+        user.save()
+        super().save(*args, **kwargs)
 
 
 class Sale(TimeStampedModel):
