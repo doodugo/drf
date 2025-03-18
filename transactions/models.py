@@ -121,7 +121,11 @@ class Buy(TimeStampedModel):
 
     @property
     def total_delivery_price(self):
-        return self.amount * DeliveryRequest.SHIPMENT_PRICE
+        if self.amount >= 10:
+            return 500 + DeliveryRequest.SHIPMENT_PRICE
+        else:
+            return 1000 + DeliveryRequest.SHIPMENT_PRICE
+
 
 class DeliveryRequest(TimeStampedModel):
     '''
