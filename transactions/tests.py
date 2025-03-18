@@ -91,7 +91,7 @@ class BuyTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_validate_insufficient_cash(self):
-        self.data['amount'] = 2
+        self.data['amount'] = 3
         response = self.client.post(self.url, self.data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("캐시가 부족합니다", response.data['non_field_errors'])
