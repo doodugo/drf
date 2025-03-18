@@ -94,7 +94,7 @@ class DeliveryRequestSerializer(serializers.ModelSerializer):
         if buy.user_id != user:
             raise serializers.ValidationError("자신의 구매 내역만 배송 요청 가능합니다")
 
-        if buy.delivery_request:
+        if buy.delivery_requests.filter(status='REQUESTED').exists():
             raise serializers.ValidationError("해당 구매에 대한 배송 요청이 존재합니다")
 
         if len(data['postal_code']) != 5:
