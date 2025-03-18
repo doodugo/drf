@@ -169,3 +169,16 @@ class DeliveryRequestView(viewsets.ModelViewSet):
     serializer_class = DeliveryRequestSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = DeliveryRequestPagination
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        queryset = queryset.filter(user_id=self.request.user).order_by('-created_date')
+        return queryset
+
+    @transaction.atomic
+    def perform_create(self, serializer):
+        serializer.save(user_id=self.request.user)
+        CashLog.objects.create(
+            user_id=self.request.user,
+            cash = -(serializer.validated_data['buy_id'].total_delivery_price)
+        )
