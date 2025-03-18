@@ -142,7 +142,7 @@ class DeliveryRequest(TimeStampedModel):
         ('CANCELLED', '취소'),
     ]
 
-    SHIPMENT_PRICE = 1,500
+    SHIPMENT_PRICE = 1500
 
     user_id = models.ForeignKey(
         to='accounts.User',
