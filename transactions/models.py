@@ -119,6 +119,9 @@ class Buy(TimeStampedModel):
         blank=False,
     )    
 
+    @property
+    def total_delivery_price(self):
+        return self.amount * DeliveryRequest.SHIPMENT_PRICE
 
 class DeliveryRequest(TimeStampedModel):
     '''
