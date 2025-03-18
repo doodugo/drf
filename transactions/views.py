@@ -135,6 +135,10 @@ class BuyView(viewsets.ModelViewSet):
 
     @transaction.atomic
     def perform_create(self, serializer):
+        '''
+            validate를 통해 검증 후 구매 처리
+        '''
+
         try: 
             serializer.save(user_id=self.request.user)
             CashLog.objects.create(

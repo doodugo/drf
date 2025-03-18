@@ -42,6 +42,15 @@ class BuySerializer(serializers.ModelSerializer):
         fields = ['sale_id', 'amount']
 
     def validate(self, data):
+        '''
+            구매 요청 검증
+            중복 요청 방지
+            구매자 검증
+            수량 검증
+            판매 상품 검증
+            캐시 검증
+        '''
+
         sale = data['sale_id']
         if cache.get(f'sale_transaction_lock_{sale.id}'):
             raise serializers.ValidationError({"detail": "중복 요청입니다."})
