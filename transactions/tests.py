@@ -11,6 +11,11 @@ from django.utils import timezone
 
 class BuyTestCase(TestCase):
     def setUp(self):
+        '''
+            구매 테스트 케이스 설정
+            signup url을 통해 welcome cash를 받은 구매자 계정 생성
+            time.sleep(1)을 통해 race condition 방지
+        '''
         time.sleep(1)
         self.url = reverse('buys-list')
         self.client = APIClient()
@@ -50,6 +55,9 @@ class BuyTestCase(TestCase):
         }
 
     def test_buy_successful(self):
+        '''
+            구매 성공 로직
+        '''
         response = self.client.post(self.url, self.data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Buy.objects.filter(user_id=self.user).count(), 1)
@@ -63,34 +71,52 @@ class BuyTestCase(TestCase):
         self.assertEqual(CashLog.objects.last().cash, -total_reduce_cash)
 
     def test_buy_failed_zero_amount(self):
+        '''
+            구매 수량이 0인 경우 구매 실패
+        '''
         self.data['amount'] = 0
         response = self.client.post(self.url, self.data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_buy_failed_over_amount(self):
+        '''
+            구매 수량이 판매 수량을 초과하는 경우 구매 실패
+        '''
         self.data['amount'] = 11
         response = self.client.post(self.url, self.data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
     def test_buy_failed_sale_not_exist(self):
+        '''
+            판매 상품이 존재하지 않는 경우 구매 실패
+        '''
         self.data['sale_id'] = 0
         response = self.client.post(self.url, self.data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_buy_failed_sale_deleted(self):
+        '''
+            판매 상품이 삭제된 경우 구매 실패
+        '''
         self.sale.deleted_date = timezone.now()
         self.sale.save()
         response = self.client.post(self.url, self.data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_buy_failed_not_buyer(self):
+        '''
+            구매자가 아닌 경우 구매 실패
+        '''
         self.client.logout()
         self.client.force_authenticate(user=self.seller)
         response = self.client.post(self.url, self.data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_buy_failed_not_enough_cash(self):
+        '''
+            캐시가 부족한 경우 구매 실패
+        '''
         self.data['amount'] = 3
         response = self.client.post(self.url, self.data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
