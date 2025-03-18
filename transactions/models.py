@@ -118,3 +118,57 @@ class Buy(TimeStampedModel):
         null=False,
         blank=False,
     )    
+
+
+class DeliveryRequest(TimeStampedModel):
+    '''
+        구매자가 배송 요청을 해야하기에 구매 로직과 결합 하지 않을 예정
+        이미 배송이 요청되었는지 상태 체크를 위해 is_requested 사용
+        중복 배송을 막기 위해 buy_id와 결합 할 예정
+        추후 amount와 관련이 있을 수 있지만 현재 단계 고려하지 않음x
+    '''
+
+    STATUS_CHOICES = [
+        ('PENDING', '대기'),
+        ('REQUESTED', '요청'),
+        ('DELIVERED', '배송완료'),
+        ('CANCELLED', '취소'),
+    ]
+
+    SHIPMENT_PRICE = 1,500
+
+    user_id = models.ForeignKey(
+        to='accounts.User',
+        on_delete=models.DO_NOTHING,
+        related_name='delivery_requests',
+        help_text = '사용자 ID',
+    )
+
+    buy_id = models.ForeignKey(
+        to='transactions.Buy',
+        on_delete=models.DO_NOTHING,
+        related_name='delivery_requests',
+        help_text = '구매 ID',
+    )
+
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default='REQUESTED',
+        help_text = '배송 상태',
+    )
+
+    address = models.CharField(
+        max_length=255,
+        help_text = '배송 주소',
+    )
+
+    postal_code = models.CharField(
+        max_length=5,
+        help_text = '우편번호',
+    )
+
+    @property
+    def is_requested(self):
+        return self.status == 'REQUESTED'
+
