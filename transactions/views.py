@@ -4,11 +4,11 @@ from django.shortcuts import render
 from rest_framework import generics
 
 from rest_framework.exceptions import PermissionDenied, ValidationError
-from .serializers import BuySerializer, SaleSerializer
+from .serializers import BuySerializer, DeliveryRequestSerializer, SaleSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from .models import Buy, CashLog, Sale
+from .models import Buy, CashLog, DeliveryRequest, Sale
 from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
 from django.db import transaction
@@ -158,3 +158,14 @@ class BuyView(viewsets.ModelViewSet):
         queryset = self.paginate_queryset(queryset)
         serializer = self.get_serializer(queryset, many=True)
         return self.get_paginated_response(serializer.data)
+
+
+class DeliveryRequestPagination(PageNumberPagination):
+    page_size = 10
+
+
+class DeliveryRequestView(viewsets.ModelViewSet):
+    queryset = DeliveryRequest.objects.filter()
+    serializer_class = DeliveryRequestSerializer
+    permission_classes = [IsAuthenticated]
+    pagination_class = DeliveryRequestPagination

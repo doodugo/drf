@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Buy, Sale, CashLog
+from .models import Buy, DeliveryRequest, Sale, CashLog
 from django.core.cache import cache
 from inventory.serializers import PhotoCardSerializer
 
@@ -75,3 +75,35 @@ class BuySerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("캐시가 부족합니다")
 
         return data
+
+
+class DeliveryRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DeliveryRequest
+        fields = ['id', 'buy_id', 'status', 'address', 'postal_code']
+
+    def validate(self, data):
+        '''
+            본인이 구매한 포토카드만 배송 받을 수 있게
+            구매에 대한 배송 요청이 있다면 중복 배송 방지
+            우편번호 기본 검증 로직
+        '''
+        user = self.context['request'].user
+        buy = data['buy_id']
+
+        if buy.user_id != user:
+            raise serializers.ValidationError("자신의 구매 내역만 배송 요청 가능합니다")
+
+        if buy.delivery_request:
+            raise serializers.ValidationError("해당 구매에 대한 배송 요청이 존재합니다")
+
+        if len(data['postal_code']) != 5:
+            raise serializers.ValidationError("우편번호는 5자리여야 합니다")
+
+        if user.total_cash < buy.total_delivery_price:
+            raise serializers.ValidationError("캐시가 부족합니다")
+
+        return data
+
+
+
