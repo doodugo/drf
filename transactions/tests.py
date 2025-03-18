@@ -90,7 +90,7 @@ class BuyTestCase(TestCase):
         response = self.client.post(self.url, self.data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_validate_insufficient_cash(self):
+    def test_buy_failed_not_enough_cash(self):
         self.data['amount'] = 3
         response = self.client.post(self.url, self.data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
