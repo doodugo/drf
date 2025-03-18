@@ -36,7 +36,7 @@ class SaleSerializer(serializers.ModelSerializer):
 
 
 class BuySerializer(serializers.ModelSerializer):
-    sale_id = SaleSerializer()
+    sale_id = serializers.PrimaryKeyRelatedField(queryset=Sale.objects.all())
     class Meta:
         model = Buy
         fields = ['sale_id', 'amount']
